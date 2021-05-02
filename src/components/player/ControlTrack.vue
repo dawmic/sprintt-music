@@ -1,28 +1,71 @@
 <template>
   <div class="control-container">
+   
       <div class="control-buttons">
       <button class="prev-track"><img src="@/assets/images/player/prev.svg" alt="prev"></button> 
-      <button class="play-track" v-if="play" @click="play=false"><img src="@/assets/images/player/play.svg" alt="play"></button>
-      <button class="pause-track" v-else @click="play=true"><img src="@/assets/images/player/pause.svg" alt="pause"></button>
+      <button class="play-track" v-if="!isPlaying" @click="startPlayer"><img src="@/assets/images/player/play.svg" alt="play"></button>
+      <button class="pause-track" v-if="isPlaying" @click="pausePlayer"><img src="@/assets/images/player/pause.svg" alt="pause"></button>
       <button class="next-track"><img src="@/assets/images/player/next.svg" alt="next"></button>
       </div>
-     <div class="progress-bar">
+  
+     <div class="progress-bar" @click="showTime">
           <label for="bar"></label>
-          <progress id="bar" :value="song" max="100"> </progress>
+          <progress id="bar" :value="song_progress" max="100"> </progress>
       </div>
-
+     
   </div>
 </template>
 
 <script>
+
+
 export default {
+   
+props:['isPlaying','trackPlayingNow','currentTrack','audioObj'],
+
 data(){
     return{
-        play: true,
+        
         song: 20,
+        play: this.isPlaying,
+        trackPlaying: this.trackPlayingNow,
+       // audioObj: new Audio(`http://api.sprintt.co/spotify/play/${this.trackPlayingNow}?access=${token}`),
        // song_progress: (Time passed in seconds / Song duration in seconds) X 100;
+       // (audioObj.currentTime / currentTrack.duration) * 100
+       
     }
-}
+},
+methods:{
+    startPlayer(){
+        this.play = true;
+        
+        this.$emit('startPlayer', this.play, this.currentTrack.track_id);
+       
+        
+    },
+    pausePlayer(){
+        
+        this.play = false;
+        this.trackPlaying = false;
+        this.$emit('pausePlayer', this.play, this.trackPlaying);
+    },
+    showTime(){
+        console.log(this.audioObj.currentTime);
+    },
+    
+   
+   
+},
+computed: {
+    timeDuration(){
+        return  this.audioObj.currentTime;
+    },
+    song_progress(){
+        return (this.audioObj.currentTime / this.currentTrack.duration) * 100;
+    },
+
+},
+
 }
 </script>
 
@@ -30,6 +73,8 @@ data(){
 
  .control-container{
   //margin: 0 auto;  
+  padding: .2rem;
+  width: 65%;
  height: 100%;
  display: flex;
  flex-direction: column;

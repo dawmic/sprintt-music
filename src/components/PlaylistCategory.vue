@@ -5,7 +5,7 @@
   <router-link tag="h3" :to="{ name: 'Playlist', params: { name: item.name, item } }" >
          {{item.name}}
       </router-link>
-  <router-link tag="p" :to="{ name: 'Playlist', params: { name: item.name, item } }" >
+  <router-link  tag="p" :to="{ name: 'Playlist', params: { name: item.name, item } }" >
          {{item.description}}
       </router-link>
    
@@ -20,7 +20,7 @@ name: 'PlaylistCategory',
 props: ['item'],
 data(){
     return{
-
+        
     }
 },
 }

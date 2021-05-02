@@ -1,7 +1,7 @@
 <template>
  <div class="player-container">
-  <CurrentTrack/>
- <ControlTrack/>
+  <CurrentTrack :songName="current.name" :albumName="current.album_name" :image="imagePlaylist"/>
+ <ControlTrack v-model="playing"/>
     <VolumeBar/>
   
  </div>
@@ -15,6 +15,10 @@ import VolumeBar from '@/components/player/VolumeBar.vue'
 export default {
 name: 'Player',
 components: { CurrentTrack, ControlTrack, VolumeBar},
+props:['current','imagePlaylist','playing'],
+model:{
+    prop: 'playing',
+},
 data(){
     return{
         

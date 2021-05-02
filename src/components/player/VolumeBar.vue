@@ -1,7 +1,7 @@
 <template>
   <div class="volume-container">
      <img src="@/assets/images/player/volume.png" alt=""><label for="vol"></label>
-         <div class="volume-bar" ref="volbar" @click="changeVolume($event)">
+         <div class="volume-bar" ref="volbar" @click="changeVolume($event);emitVolume()">
            <div class="volume-progress" :style="{width: volume + '%'}"></div>
          </div>
          
@@ -22,7 +22,10 @@ methods: {
     
     let position = e.clientX - this.$refs.volbar.offsetLeft;
     this.volume = Math.floor(100 * position / this.$refs.volbar.clientWidth);
-  }
+  },
+  emitVolume(){
+    this.$emit('emitVolume', this.volume);
+  },
 }
 
 
@@ -32,6 +35,8 @@ methods: {
 <style lang="scss" scoped>
 .volume-container{
     height: 100%;
+    padding: .2rem;
+    width: 10%;
     display: flex;
    align-items: center;
    margin-right: 3rem;

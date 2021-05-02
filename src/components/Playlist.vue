@@ -4,9 +4,9 @@
        :style="{background: `linear-gradient(to bottom, rgba(0, 0, 0, .6) 0%, rgba(0, 0, 0, .8) 100%), url(${item.image_url})`}"
       >
           <h2>{{playlist.name}}</h2>
-          <p class="playlist_songs">{{playlist_number_of_songs}} songs</p>
-          <p class="playlist_description">{{playlist.description}}</p>
-          <p class="playlist_duration">{{playlist_duration}}</p>
+          <p class="playlist_songs">{{playlistInfo.number_of_songs}} songs</p>
+          <p class="playlist_description">{{playlistInfo.description}}</p>
+          <p class="playlist_duration">{{playlistInfo.duration}}</p>
       </div>
       <div class="tracks-container" ref="tracksContainer">
          <div class="filter-container">
@@ -27,9 +27,9 @@
               </thead>
               <tbody>
                  
-                <tr v-for="track in filteredAndSortedTracks" :key="track.id">
-                    <td v-if="playing" @click="playing=false" class="pause-btn"><button><img src="@/assets/images/pause_line_icon.png" alt="play-song"></button></td>
-                    <td v-else @click="playing = true" class="play-btn"><button><img src="@/assets/images/play_line_icon.png" alt="play-song"></button></td>
+                <tr v-for="track in filteredAndSortedTracks" :key="track.id" :class="{activeTrack: trackPlayingNow == track.track_id}">
+                    <td v-if="trackPlayingNow == track.track_id"  class="pause-btn"><button @click="pauseTrack(track)"><img src="@/assets/images/pause_line_icon.png" alt="pause"></button></td>
+                    <td v-else class="play-btn"><button @click="currentTrack(track), playTrack(track)"><img src="@/assets/images/play_line_icon.png" alt="play"></button></td>
                     <td class="liked-btn"><button><img src="@/assets/images/liked_songs_icon.png" alt="like"></button></td>
                      <td class="track-name">{{track.name}}</td>
                      <td class="track-artist">{{track.artists_names}}</td>
@@ -54,16 +54,42 @@ const options = { headers: {
 
 export default {
 name: 'Playlist',
-props: ['item'],
+props: ['item','trackPlayingNow'],
+
 data(){
     return{
         filter_tracks: '',
         error: false,
-        playlist_number_of_songs: '50 songs',
-        playlist_duration: '2hr 30min',
         playlist: 'something wrong',
-        tracks: [],
-        playing: false,
+        playlistInfo: {
+            numer_of_songs: '50 songs',
+            duration: '2hr 30min',
+            tracks: [],
+        },
+        playingMusic: false,
+        activeTrack: this.trackPlayingNow,
+        
+        
+    }
+},
+methods:{
+   
+    currentTrack(current){
+        this.$emit('currentTrack', current, this.item.image_url);
+       
+    },
+    playTrack(track){
+       
+        this.playingMusic = track.album_name;
+   
+        this.activeTrack = track.track_id;
+       this.$emit('playTrack', this.playingMusic, this.activeTrack, this.playlistInfo);
+    },
+    pauseTrack(){
+        this.playingMusic = false;
+        this.activeTrack = false;
+        this.$emit('pauseTrack', this.playingMusic, this.activeTrack);
+        console.log('PAUSE TRACK');
     }
 },
 
@@ -77,10 +103,10 @@ mounted() {
         axios
       .get(`https://api.sprintt.co/spotify/playlist_tracks/${this.item.playlist_id}`, options)
       .then(response =>{ console.log(response.data)
-      this.tracks = response.data.tracks;
+      this.playlistInfo.tracks = response.data.tracks;
       console.log(this.tracks);
-      this.playlist_duration = response.data.playlist_duration;
-      this.playlist_number_of_songs = response.data.playlist_tracks;
+      this.playlistInfo.duration = response.data.playlist_duration;
+      this.playlistInfo.number_of_songs = response.data.playlist_tracks;
       this.error = false;
       })
       .catch(error=> {
@@ -101,7 +127,7 @@ mounted() {
      return this.tracks.filter(track => {
         return track.name.toLowerCase().includes(this.filter_tracks.toLowerCase())
      }).sort(compare) */
-     return this.tracks.filter(track =>{
+     return this.playlistInfo.tracks.filter(track =>{
         return (track.name.toLowerCase().includes(this.filter_tracks.toLowerCase()) ||  track.artists_names.toLowerCase().includes(this.filter_tracks.toLowerCase()) || track.album_name.toLowerCase().includes(this.filter_tracks.toLowerCase()))
      
      })
@@ -276,6 +302,11 @@ mounted() {
             margin-top: 10rem;
             font-size: 2.4rem;
         }
+    }
+
+    .activeTrack{
+        background: rgba(29,185,84,0.2);
+        border-radius: 10px;
     }
 }
 

@@ -22,7 +22,7 @@
    <carousel :perPage="5" class="carousel-container" :paginationActiveColor="'lightgray'" :paginationColor="'black'"
    :paginationEnabled="false"
    :navigationEnabled="true" :navigationNextLabel="next" :navigationPrevLabel="prev">
-     <slide  v-for="item in mood_playlist" :key="item.playlist_id"><PlaylistCategory :item="item" /> </slide>
+     <slide  v-for="item in mood_playlist" :key="item.playlist_id"><PlaylistCategory :item="item"  /> </slide>
     </carousel>
      </div>
  </div>
@@ -108,10 +108,12 @@ export default {
         }
        
     },
+  
+    }
    
  
 
-}
+
 
 </script>
 
