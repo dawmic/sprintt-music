@@ -9,7 +9,7 @@ import Playlist from '@/components/Playlist.vue'
 Vue.use(VueRouter)
 
 const routes = [{
-        path: '/',
+        path: '/Home',
         name: 'Home',
         component: Home,
         props: true,
@@ -27,7 +27,7 @@ const routes = [{
         props: true,
     },
     {
-        path: '/playlist/:name',
+        path: '/Home/playlist/:name',
         name: 'Playlist',
         component: Playlist,
         props: true,
