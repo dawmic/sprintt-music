@@ -29,7 +29,7 @@
                  
                 <tr v-for="track in filteredAndSortedTracks" :key="track.id" :class="{activeTrack: trackPlayingNow == track.track_id}">
                     <td v-if="trackPlayingNow == track.track_id"  class="pause-btn"><button @click="pauseTrack(track)"><img src="@/assets/images/pause_line_icon.png" alt="pause"></button></td>
-                    <td v-else class="play-btn"><button @click="currentTrack(track), playTrack(track)"><img src="@/assets/images/play_line_icon.png" alt="play"></button></td>
+                    <td v-else class="play-btn"><button @click="currentTrack(track), playTrack(track), post_recentlyPlaylist(track.track_id)"><img src="@/assets/images/play_line_icon.png" alt="play"></button></td>
                     <td class="liked-btn"><button><img src="@/assets/images/liked_songs_icon.png" alt="like"></button></td>
                      <td class="track-name">{{track.name}}</td>
                      <td class="track-artist">{{track.artists_names}}</td>
@@ -90,6 +90,9 @@ methods:{
         this.activeTrack = false;
         this.$emit('pauseTrack', this.playingMusic, this.activeTrack);
         console.log('PAUSE TRACK');
+    },
+    post_recentlyPlaylist(track_id){
+        this.$emit('post_recentlyPlaylist', track_id, this.playlist.playlist_id);
     }
 },
 
