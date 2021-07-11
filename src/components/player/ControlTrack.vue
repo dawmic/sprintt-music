@@ -5,12 +5,13 @@
       <button class="prev-track"><img src="@/assets/images/player/prev.svg" alt="prev"></button> 
       <button class="play-track" v-if="!isPlaying" @click="startPlayer"><img src="@/assets/images/player/play.svg" alt="play"></button>
       <button class="pause-track" v-if="isPlaying" @click="pausePlayer"><img src="@/assets/images/player/pause.svg" alt="pause"></button>
-      <button class="next-track"><img src="@/assets/images/player/next.svg" alt="next"></button>
+      <button class="next-track" @click="nextTrack(currentTrack)"><img src="@/assets/images/player/next.svg" alt="next"></button>
       </div>
   
-     <div class="progress-bar" @click="showTime">
+     <div class="progress-bar" @click="showTime"> {{convertTime(currentTimePlayingTrack)}}
           <label for="bar"></label>
           <progress id="bar" :value="song_progress" max="100"> </progress>
+          {{convertTime(Math.floor(song_time_left))}}
       </div>
      
   </div>
@@ -21,7 +22,7 @@
 
 export default {
    
-props:['isPlaying','trackPlayingNow','currentTrack','audioObj'],
+props:['isPlaying','trackPlayingNow','currentTrack','audioObj','currentTimePlayingTrack'],
 
 data(){
     return{
@@ -29,6 +30,8 @@ data(){
         song: 20,
         play: this.isPlaying,
         trackPlaying: this.trackPlayingNow,
+        //roundTrackDuration: this.currentTrack.duration / 1000,
+       
        // audioObj: new Audio(`http://api.sprintt.co/spotify/play/${this.trackPlayingNow}?access=${token}`),
        // song_progress: (Time passed in seconds / Song duration in seconds) X 100;
        // (audioObj.currentTime / currentTrack.duration) * 100
@@ -40,6 +43,7 @@ methods:{
         this.play = true;
         
         this.$emit('startPlayer', this.play, this.currentTrack.track_id);
+        console.log(this.audioObj.currentTime);
        
         
     },
@@ -52,19 +56,37 @@ methods:{
     showTime(){
         console.log(this.audioObj.currentTime);
     },
+    nextTrack(track){
+        
+        this.$emit('nextTrack', track);
+    },
+   convertTime(value) {
+    const sec = parseInt(value, 10); // convert value to number if it's string
+    let hours   = Math.floor(sec / 3600); // get hours
+    let minutes = Math.floor((sec - (hours * 3600)) / 60); // get minutes
+    let seconds = sec - (hours * 3600) - (minutes * 60); //  get seconds
+    // add 0 if value < 10; Example: 2 => 02
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return minutes+':'+seconds; // Return is MM : SS
+},
     
    
    
 },
 computed: {
-    timeDuration(){
-        return  this.audioObj.currentTime;
-    },
-    song_progress(){
-        return (this.audioObj.currentTime / this.currentTrack.duration) * 100;
-    },
 
+    song_progress(){
+        return (this.currentTimePlayingTrack / (this.currentTrack.duration / 1000)) * 100;
+    },
+    song_time_left(){
+        return (this.currentTrack.duration / 1000) - this.currentTimePlayingTrack;
+    }
 },
+
+
+
 
 }
 </script>
@@ -104,7 +126,8 @@ computed: {
         width: 75rem; 
         color: #191414;
         background-color: #C4C4C4;
-       appearance: none;
+        appearance: none;
+       
         
         }
         progress::-webkit-progress-bar {
@@ -113,6 +136,7 @@ computed: {
              }
         progress::-webkit-progress-value {
              background: #191414;
+             transition: width 1s;
              }
               progress::-moz-progress-bar {
              background: #191414;
