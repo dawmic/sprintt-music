@@ -81,7 +81,7 @@ methods:{
     playTrack(track){
        
         this.playingMusic = track.album_name;
-   
+        
         this.activeTrack = track.track_id;
        this.$emit('playTrack', this.playingMusic, this.activeTrack, this.playlistInfo);
     },

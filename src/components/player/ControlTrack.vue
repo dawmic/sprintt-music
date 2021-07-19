@@ -2,16 +2,16 @@
   <div class="control-container">
    
       <div class="control-buttons">
-      <button class="prev-track"><img src="@/assets/images/player/prev.svg" alt="prev"></button> 
+      <button class="prev-track" @click="prevTrack()"><img src="@/assets/images/player/prev.svg" alt="prev"></button> 
       <button class="play-track" v-if="!isPlaying" @click="startPlayer"><img src="@/assets/images/player/play.svg" alt="play"></button>
       <button class="pause-track" v-if="isPlaying" @click="pausePlayer"><img src="@/assets/images/player/pause.svg" alt="pause"></button>
-      <button class="next-track" @click="nextTrack(currentTrack)"><img src="@/assets/images/player/next.svg" alt="next"></button>
+      <button class="next-track" @click="nextTrack()"><img src="@/assets/images/player/next.svg" alt="next"></button>
       </div>
   
-     <div class="progress-bar" @click="showTime"> {{convertTime(currentTimePlayingTrack)}}
+     <div class="progress-bar" @click="showTime"> <span>{{convertTime(currentTimePlayingTrack)}}</span>
           <label for="bar"></label>
           <progress id="bar" :value="song_progress" max="100"> </progress>
-          {{convertTime(Math.floor(song_time_left))}}
+         <span> {{convertTime(Math.floor(song_time_left))}}</span>
       </div>
      
   </div>
@@ -56,9 +56,12 @@ methods:{
     showTime(){
         console.log(this.audioObj.currentTime);
     },
-    nextTrack(track){
+    nextTrack(){
         
-        this.$emit('nextTrack', track);
+        this.$emit('nextTrack');
+    },
+    prevTrack(){
+        this.$emit('prevTrack');
     },
    convertTime(value) {
     const sec = parseInt(value, 10); // convert value to number if it's string
@@ -121,6 +124,9 @@ computed: {
            }
     }
     .progress-bar{
+        span{
+            margin: 0 5px;
+        }
         progress{
              height: .5rem;
         width: 75rem; 

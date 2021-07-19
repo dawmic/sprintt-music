@@ -23,17 +23,18 @@
       />
   </main>
  <div class="player-container">
-   <CurrentTrack  :currentTrack="currentTrack"
-                  :image="imagePlaylist"
+   <CurrentTrack  :currentTrack="track.currentTrack"
+                  :image="track.imagePlaylist"
    />
    <ControlTrack  :isPlaying="isPlaying"
                   @startPlayer="startPlayer"
                   @pausePlayer="pausePlayer"
                   :trackPlayingNow="trackPlayingNow"
-                  :currentTrack="currentTrack"
+                  :currentTrack="track.currentTrack"
                   :audioObj="audioObj"
                   @nextTrack="nextTrack"
-                  :currentTimePlayingTrack="currentTimePlayingTrack"
+                  @prevTrack="prevTrack"
+                  :currentTimePlayingTrack="track.currentTimePlayingTrack"
    />
    <VolumeBar @emitVolume="changeVolume"/>
    
@@ -75,12 +76,14 @@ export default {
       recently_pl: '',
       featured_pl: '',
       mood_pl: '',
-      currentTrack: '',
-      imagePlaylist: '',
-      activePlaylistTracks: '',
       isPlaying: false, //player play pause
       trackPlayingNow: '', // player play pause
-      currentTimePlayingTrack: '',
+      track:{
+        currentTrack: '',
+        imagePlaylist: '',
+        activePlaylistTracks: '',
+        currentTimePlayingTrack: '',
+      },
 
       //audioObj: new Audio(`http://api.sprintt.co/spotify/play/${this.trackPlayingNow}?access=${token}`),
      
@@ -110,8 +113,8 @@ methods:{
   showLog(...args){
  this.audioObj.pause();
     const [x,y] = args;
-   this.currentTrack = x;
-   this.imagePlaylist = y;
+   this.track.currentTrack = x;
+   this.track.imagePlaylist = y;
     
    this.audioObj.play();
   },
@@ -123,10 +126,15 @@ methods:{
    
    this.trackPlayingNow = activeTrack;
    
-   this.activePlaylistTracks = playlistInfo;
+   this.track.activePlaylistTracks = playlistInfo;
   
    // this.audioObj.play();
   this.currentTimeInterval();
+ this.audioObj.onended = ()=> {
+   this.nextTrack();
+   console.log('test next');
+ };
+   
     
 
   },
@@ -160,25 +168,31 @@ methods:{
   changeVolume(vol){
     this.audioObj.volume = vol/100;
   },
-  nextTrack(track){
-  
-    let x = this.activePlaylistTracks.tracks.findIndex(el => el.track_id == track.track_id);
-    console.log(x);
-    let newCurrentTrack = this.activePlaylistTracks.tracks[x+1];
-    console.log(newCurrentTrack);
+  nextTrack(){
+ 
+    let next = this.track.activePlaylistTracks.tracks[this.nextTrackIndex];
+ 
     this.audioObj.pause();
-    this.currentTrack.track_id = newCurrentTrack.track_id;
-    this.trackPlayingNow = false;
-    this.trackPlayingNow = newCurrentTrack.track_id;
-    
+    this.isPlaying = false;
+    this.track.currentTrack = next;
+    this.trackPlayingNow = this.track.currentTrack.track_id;
     this.audioObj.play();
+    this.isPlaying = true;
+  },
+  prevTrack(){
+    console.log('test prev');
+    let prev = this.track.activePlaylistTracks.tracks[this.prevTrackIndex];
+      this.audioObj.pause();
+    this.isPlaying = false;
+    this.track.currentTrack = prev;
+    this.trackPlayingNow = this.track.currentTrack.track_id;
+    this.audioObj.play();
+    this.isPlaying = true;
   },
   post_recentlyPlaylist(...args){
     const [recently_track_id, recently_playlist_id] = args;
    
     if(recently_track_id && recently_playlist_id != undefined)
-    
-   
       axios.post(`http://api.sprintt.co/spotify/notify_played/${recently_playlist_id}/${recently_track_id}`,null,options);
 
       //get recent playlist
@@ -189,7 +203,7 @@ methods:{
   currentTimeInterval(){
     
     setInterval(()=>{
-      this.currentTimePlayingTrack = Math.floor(this.audioObj.currentTime);
+      this.track.currentTimePlayingTrack = Math.floor(this.audioObj.currentTime);
     },1000); 
     console.log(this.audioObj.currentTime + 'czas');
   },
@@ -200,13 +214,21 @@ methods:{
 },
 computed: {
   audioObj(){
-   return new Audio(`http://api.sprintt.co/spotify/play/${this.currentTrack.track_id}?access=${token}`);
+   return new Audio(`http://api.sprintt.co/spotify/play/${this.track.currentTrack.track_id}?access=${token}`);
   },
+  nextTrackIndex(){
+    return this.track.activePlaylistTracks.tracks.indexOf(this.track.currentTrack) +1;
+  },
+  prevTrackIndex(){
+    return this.track.activePlaylistTracks.tracks.indexOf(this.track.currentTrack) -1;
+  },
+
   
 },
 watch: {
     audioObj(newAudioObj, oldAudioObj) {
-        oldAudioObj.pause()
+        oldAudioObj.pause();
+        
     }
   }
 
