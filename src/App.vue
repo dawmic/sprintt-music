@@ -19,7 +19,8 @@
       @pauseTrack="pauseTrack"
       :trackPlayingNow="trackPlayingNow"
       @post_recentlyPlaylist="post_recentlyPlaylist"
-    
+     @like_song="like_song"
+     @unlike_song="unlike_song"
       />
   </main>
  <div class="player-container">
@@ -35,6 +36,7 @@
                   @nextTrack="nextTrack"
                   @prevTrack="prevTrack"
                   :currentTimePlayingTrack="track.currentTimePlayingTrack"
+                 
    />
    <VolumeBar @emitVolume="changeVolume"/>
    
@@ -78,6 +80,7 @@ export default {
       mood_pl: '',
       isPlaying: false, //player play pause
       trackPlayingNow: '', // player play pause
+      volume: .4,
       track:{
         currentTrack: '',
         imagePlaylist: '',
@@ -127,7 +130,7 @@ methods:{
    this.trackPlayingNow = activeTrack;
    
    this.track.activePlaylistTracks = playlistInfo;
-  
+  this.audioObj.volume = this.volume;
    // this.audioObj.play();
   this.currentTimeInterval();
  this.audioObj.onended = ()=> {
@@ -166,7 +169,9 @@ methods:{
     
   },
   changeVolume(vol){
-    this.audioObj.volume = vol/100;
+  this.volume = vol/100;
+  this.audioObj.volume = this.volume;
+    
   },
   nextTrack(){
  
@@ -178,6 +183,20 @@ methods:{
     this.trackPlayingNow = this.track.currentTrack.track_id;
     this.audioObj.play();
     this.isPlaying = true;
+     this.audioObj.volume = this.volume;
+    this.audioObj.onended = ()=> {
+    
+   this.nextTrack();
+    if(this.track.activePlaylistTracks.tracks[this.nextTrackIndex] == this.track.activePlaylistTracks.tracks[this.track.activePlaylistTracks.tracks.length -1] ){
+     /* this.isPlaying = false;
+      this.track.currentTrack = '';
+      this.trackPlayingNow = '';
+    */
+      console.log('ostatni track'); 
+      this.audioObj.pause();
+
+    } 
+ };
   },
   prevTrack(){
     console.log('test prev');
@@ -210,6 +229,18 @@ methods:{
   stopTimeInterval(){
     clearInterval();
   },
+  like_song(track){
+    track.is_liked = 1;
+    if(track){
+    axios.post(`https://api.sprintt.co/music/liked_tracks/${track.track_id}?status=true`,null,options);
+    }
+  },
+  unlike_song(track){
+    track.is_liked = 0;
+    if(track){
+    axios.post(`https://api.sprintt.co/music/liked_tracks/${track.track_id}?status=false`,null,options);
+    }
+  },
  
 },
 computed: {
@@ -222,6 +253,7 @@ computed: {
   prevTrackIndex(){
     return this.track.activePlaylistTracks.tracks.indexOf(this.track.currentTrack) -1;
   },
+  
 
   
 },

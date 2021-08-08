@@ -1,12 +1,13 @@
 <template>
   <div class="playlist-container">
       <div class="header-container" 
-       :style="{background: `linear-gradient(to bottom, rgba(0, 0, 0, .6) 0%, rgba(0, 0, 0, .8) 100%), url(${item.image_url})`}"
+       :style="{background: `linear-gradient(to bottom, rgba(0, 0, 0, .6) 0%, rgba(0, 0, 0, .8) 100%), url(${playlist.image_url})`}"
       >
           <h2>{{playlist.name}}</h2>
+          
           <p class="playlist_songs">{{playlistInfo.number_of_songs}} songs</p>
           <p class="playlist_description">{{playlistInfo.description}}</p>
-          <p class="playlist_duration">{{playlistInfo.duration}}</p>
+          <p class="playlist_duration">{{playlistInfo.duration || ''}}</p>
       </div>
       <div class="tracks-container" ref="tracksContainer">
          <div class="filter-container">
@@ -30,7 +31,8 @@
                 <tr v-for="track in filteredAndSortedTracks" :key="track.id" :class="{activeTrack: trackPlayingNow == track.track_id}">
                     <td v-if="trackPlayingNow == track.track_id"  class="pause-btn"><button @click="pauseTrack(track)"><img src="@/assets/images/pause_line_icon.png" alt="pause"></button></td>
                     <td v-else class="play-btn"><button @click="currentTrack(track), playTrack(track), post_recentlyPlaylist(track.track_id)"><img src="@/assets/images/play_line_icon.png" alt="play"></button></td>
-                    <td class="liked-btn"><button><img src="@/assets/images/liked_songs_icon.png" alt="like"></button></td>
+                    <td v-if="!track.is_liked" class="like-btn" @click="like_song(track)"><button><img src="@/assets/images/liked_songs_icon.png" alt="like"></button></td>
+                    <td v-if="track.is_liked"  class="like-btn" @click="unlike_song(track)"><button><img src="@/assets/images/liked.png" alt="unlike"></button></td>
                      <td class="track-name">{{track.name}}</td>
                      <td class="track-artist">{{track.artists_names}}</td>
                      <td class="track-album">{{track.album_name}}</td>
@@ -38,9 +40,8 @@
                 </tr>
               </tbody>
           </table>
-           <p class="no-result-info" v-if="error">
-                     Sorry, something does not work :-(
-                  </p>
+          
+                  <div class="dots-3" v-if="error"></div>
       </div>
   </div>
 </template>
@@ -54,15 +55,17 @@ const options = { headers: {
 
 export default {
 name: 'Playlist',
-props: ['item','trackPlayingNow'],
+props: ['item','trackPlayingNow','liked_path'],
 
 data(){
     return{
+        img_path: '',
+        liked_songs: false,
         filter_tracks: '',
-        error: false,
+        error: true,
         playlist: 'something wrong',
         playlistInfo: {
-            numer_of_songs: '50 songs',
+            number_of_songs: '50',
             duration: '2hr 30min',
             tracks: [],
         },
@@ -75,7 +78,7 @@ data(){
 methods:{
    
     currentTrack(current){
-        this.$emit('currentTrack', current, this.item.image_url);
+        this.$emit('currentTrack', current, /*this.item.image_url*/ this.playlist.image_url);
        
     },
     playTrack(track){
@@ -93,16 +96,39 @@ methods:{
     },
     post_recentlyPlaylist(track_id){
         this.$emit('post_recentlyPlaylist', track_id, this.playlist.playlist_id);
-    }
+    },
+    like_song(track){
+      
+      this.$emit('like_song', track);
+    },
+    unlike_song(track){
+        this.$emit('unlike_song', track);
+    },
 },
 
   
 
 mounted() {
+ if(this.liked_path){
+    this.liked_songs = true;
+    this.playlist = this.item;
+
+     axios.get(this.liked_path ,options)
+     .then(response=>{console.log(response.data);
+     this.playlistInfo.tracks = response.data.liked_tracks;
+     this.playlistInfo.duration = '';
+     this.error = false;
+     this.playlistInfo.number_of_songs = response.data.liked_tracks.length;
+    
+     })
+ }
+ else
+ {
+
  
-        if (this.item) {
-            this.playlist = this.item;   
         
+            this.playlist = this.item;   
+            this.img_path = this.item.image_url;
         axios
       .get(`https://api.sprintt.co/spotify/playlist_tracks/${this.item.playlist_id}`, options)
       .then(response =>{ console.log(response.data)
@@ -115,8 +141,9 @@ mounted() {
       .catch(error=> {
           this.error = true;
           console.log(error)})
-}
-      
+        
+
+}     
     },
     computed: {
     filteredAndSortedTracks(){
@@ -130,7 +157,7 @@ mounted() {
      return this.tracks.filter(track => {
         return track.name.toLowerCase().includes(this.filter_tracks.toLowerCase())
      }).sort(compare) */
-     return this.playlistInfo.tracks.filter(track =>{
+   return this.playlistInfo.tracks.filter(track =>{
         return (track.name.toLowerCase().includes(this.filter_tracks.toLowerCase()) ||  track.artists_names.toLowerCase().includes(this.filter_tracks.toLowerCase()) || track.album_name.toLowerCase().includes(this.filter_tracks.toLowerCase()))
      
      })
@@ -261,7 +288,7 @@ mounted() {
                      visibility: visible; 
                   } 
                }
-              .liked-btn{
+              .like-btn{
                   width: 5%;
                   button{ border: none;
                   background: transparent;
@@ -304,13 +331,37 @@ mounted() {
         .no-result-info{
             margin-top: 10rem;
             font-size: 2.4rem;
+            
+
         }
+        .dots-3 {
+            margin-top: 10rem;
+  width:50px;
+  height:24px;
+  background: 
+    radial-gradient(circle closest-side,currentColor 90%,#0000) 0%   50%,
+    radial-gradient(circle closest-side,currentColor 90%,#0000) 50%  50%,
+    radial-gradient(circle closest-side,currentColor 90%,#0000) 100% 50%;
+  background-size:calc(100%/3) 12px;
+  background-repeat: no-repeat;
+  animation:d3 1s infinite linear;
+}
+@keyframes d3 {
+    20%{background-position:0%   0%, 50%  50%,100%  50%}
+    40%{background-position:0% 100%, 50%   0%,100%  50%}
+    60%{background-position:0%  50%, 50% 100%,100%   0%}
+    80%{background-position:0%  50%, 50%  50%,100% 100%}
+}
+
     }
+
+    
 
     .activeTrack{
         background: rgba(29,185,84,0.2);
         border-radius: 10px;
     }
 }
+
 
 </style>
