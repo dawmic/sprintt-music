@@ -31,7 +31,14 @@ const routes = [{
         name: 'Playlist',
         component: Playlist,
         props: true,
+    },
+    {
+        path: '/Liked_songs/playlist',
+        name: 'Like-playlist',
+        component: Playlist,
+        props: true,
     }
+
 ]
 
 const router = new VueRouter({

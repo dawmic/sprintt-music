@@ -98,11 +98,15 @@ methods:{
         this.$emit('post_recentlyPlaylist', track_id, this.playlist.playlist_id);
     },
     like_song(track){
-      
+      console.log('like test');
       this.$emit('like_song', track);
     },
     unlike_song(track){
+        console.log('unlike test');
         this.$emit('unlike_song', track);
+        console.log(this.$route.name);
+        
+        
     },
 },
 
@@ -120,6 +124,10 @@ mounted() {
      this.error = false;
      this.playlistInfo.number_of_songs = response.data.liked_tracks.length;
     
+     })
+     .catch(error => {
+         this.error = true;
+         console.log(error)
      })
  }
  else

@@ -5,7 +5,8 @@
       <ul>
         <li><router-link to="/Home"><img src="@/assets/images/home_icon.png" alt="home"><span>Home</span></router-link></li>
         <li><router-link to="/Browse"><img src="@/assets/images/browse_icon.png" alt="browse"><span>Browse</span></router-link></li>
-        <li><router-link to="/Liked_songs"><img src="@/assets/images/liked_songs_icon.png" alt="liked songs"><span>Liked songs</span></router-link></li>
+       <!-- <li><router-link to="/Liked_songs"><img src="@/assets/images/liked_songs_icon.png" alt="liked songs"><span>Liked songs</span></router-link></li>-->
+        <li><router-link :to="{ name: 'Like-playlist', params: { liked_path:liked_path, item:liked_obj  } }"><img src="@/assets/images/liked_songs_icon.png" alt="liked songs"><span>Liked songs</span></router-link></li>
       </ul>
     
       
@@ -75,6 +76,12 @@ export default {
   },
   data(){
     return{
+       liked_obj:{ image_url: require('@/assets/images/liked_songs.jpg',),
+                      description: '',
+                      name: 'Liked Songs',
+                      playlist_id: 9999999999,
+        },
+      liked_path:"https://api.sprintt.co/music/liked_tracks?limit=100",
       recently_pl: '',
       featured_pl: '',
       mood_pl: '',
