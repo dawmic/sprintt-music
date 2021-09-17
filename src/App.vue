@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav class="nav-panel">
-      <img class="spotify-logo" src="@/assets/images/sprintt_logo.png" alt="spotify">
+      <router-link to="/Home"><img class="spotify-logo" src="@/assets/images/sprintt_logo.png" alt="spotify"></router-link>
       <ul>
         <li><router-link to="/Home"><img src="@/assets/images/home_icon.png" alt="home"><span>Home</span></router-link></li>
         <li><router-link to="/Browse"><img src="@/assets/images/browse_icon.png" alt="browse"><span>Browse</span></router-link></li>
@@ -22,6 +22,9 @@
       @post_recentlyPlaylist="post_recentlyPlaylist"
      @like_song="like_song"
      @unlike_song="unlike_song"
+     @currentTrackCategory="showLog"
+     @playCategory="playTrack"
+     
       />
   </main>
  <div class="player-container">
@@ -37,6 +40,8 @@
                   @nextTrack="nextTrack"
                   @prevTrack="prevTrack"
                   :currentTimePlayingTrack="track.currentTimePlayingTrack"
+                  
+              
                  
    />
    <VolumeBar @emitVolume="changeVolume"/>
@@ -56,9 +61,9 @@ const options = { headers: {
     'user-access-token': '90275ed9-b7f3-4061-a8b7-6d602bfef99c' 
 }
   };
-const recent_list = axios.get('http://api.sprintt.co/spotify/recently_played_playlists?limit=10', options);
-const featured_list = axios.get('http://api.sprintt.co/spotify/featured_playlists?limit=10', options);
-const mood_list = axios.get('http://api.sprintt.co/spotify/mood_playlists?limit=10', options);
+const recent_list = axios.get('https://api.sprintt.co/spotify/recently_played_playlists?limit=10', options);
+const featured_list = axios.get('https://api.sprintt.co/spotify/featured_playlists?limit=10', options);
+const mood_list = axios.get('https://api.sprintt.co/spotify/mood_playlists?limit=10', options);
 
 const getEncryptedToken = (token) => {
     let date = new Date();
@@ -219,10 +224,10 @@ methods:{
     const [recently_track_id, recently_playlist_id] = args;
    
     if(recently_track_id && recently_playlist_id != undefined)
-      axios.post(`http://api.sprintt.co/spotify/notify_played/${recently_playlist_id}/${recently_track_id}`,null,options);
+      axios.post(`https://api.sprintt.co/spotify/notify_played/${recently_playlist_id}/${recently_track_id}`,null,options);
 
       //get recent playlist
-      axios.get('http://api.sprintt.co/spotify/recently_played_playlists?limit=10', options)
+      axios.get('https://api.sprintt.co/spotify/recently_played_playlists?limit=10', options)
       .then(response => this.recently_pl = response.data.playlists);
           
   },
@@ -252,7 +257,7 @@ methods:{
 },
 computed: {
   audioObj(){
-   return new Audio(`http://api.sprintt.co/spotify/play/${this.track.currentTrack.track_id}?access=${token}`);
+   return new Audio(`https://api.sprintt.co/spotify/play/${this.track.currentTrack.track_id}?access=${token}`);
   },
   nextTrackIndex(){
     return this.track.activePlaylistTracks.tracks.indexOf(this.track.currentTrack) +1;
@@ -312,7 +317,7 @@ flex-direction: column;
 align-items: center;
   background: linear-gradient(0deg, #FFFFFF, #FFFFFF);
   .spotify-logo{
-    margin: 0 0 2rem 0;
+    margin: 0 0 2rem -6rem;
   align-self: flex-start;
    
   }
