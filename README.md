@@ -1,5 +1,5 @@
 # spotify-project
-
+[LIVE DEMO](https://nervous-ramanujan-8d6edf.netlify.app)
 ## Project setup
 ```
 npm install
